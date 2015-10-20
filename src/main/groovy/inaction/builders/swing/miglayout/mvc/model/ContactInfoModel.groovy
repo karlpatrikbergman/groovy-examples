@@ -8,7 +8,7 @@ class ContactInfoModel {
     @Bindable String firstName
     @Bindable String surName
     @Bindable String address
-    @Bindable String phoneNumber
+    @Bindable String city
     @Bindable String email
     @Bindable String homePage
 }

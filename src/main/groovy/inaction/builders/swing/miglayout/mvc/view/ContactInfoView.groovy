@@ -1,34 +1,25 @@
 package inaction.builders.swing.miglayout.mvc.view
+
+import groovy.beans.Bindable
 import groovy.swing.SwingBuilder
 import inaction.builders.swing.miglayout.mvc.model.ContactInfoModel
 import net.miginfocom.swing.MigLayout
-import org.codehaus.groovy.binding.ClosureTriggerBinding
 
 import javax.swing.*
+import java.awt.*
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE
 
 class ContactInfoView {
     private SwingBuilder swing
-    private Action previousAction
-    private Action nextAction
-    Step step = new Step()
+    private JFrame frame
+    private Step step
 
     ContactInfoView(ContactInfoModel contactInfoModel) {
+        step = new Step()
         swing = new SwingBuilder()
-
-        previousAction = swing.action(
-                name: "Previous",
-                closure:this.&previousButtonClosure
-        )
-
-        nextAction = swing.action(
-                name: "Next",
-                closure:this.&nextButtonClosure
-        )
-
         swing.build() {
-            frame(
+            frame = frame(
                     title: "Contact Info",
                     pack: true,
                     visible: true,
@@ -37,15 +28,69 @@ class ContactInfoView {
                             "fill, debug",
                             "[][]", //Column constraints
                             "[]10[]"  //Row constraints
-                    )
+                    ),
+
+
             ) {
+                Point cp = GraphicsEnvironment.localGraphicsEnvironment.centerPoint
+                current.location = new Point((int)(cp.x - current.width), (int)(cp.y - current.height))
+
                 panel(id: "infoPanels", constraints: "wrap, span 2") {
-                    infoPanel("nameInfo", true, "First name", "firstName", "Surename", "surename")
-//                    infoPanel("adressInfo", false, "Address", "address", "City", "city")
-//                    infoPanel("webInfo", false, "E-mail", "email", "Home page", "homePage")
+                    panel(id: "nameInfo", visible: true, constraints: "hidemode 3", layout: new MigLayout("fill", "[][]", "[]10[]")) {
+                        label(text: "First name", constraints: "width 100!")
+                        textField(id: "firstName", constraints: "width 130!, wrap, align right", text: bind("firstName", target: contactInfoModel, mutual: true))
+                        label(text: "Surname")
+                        textField(id: "surName", constraints: "width 130!", text: bind("surName", target: contactInfoModel, mutual: true))
+                    }
+                    panel(id: "adressInfo", visible: false, constraints: "hidemode 3", layout: new MigLayout("fill", "[][]", "[]10[]")) {
+                        label(text: "Address", constraints: "width 100!")
+                        textField(id: "address", constraints: "width 130!, wrap, align right", text: bind("address", target: contactInfoModel, mutual: true))
+                        label(text: "City")
+                        textField(id: "city", constraints: "width 130!", text: bind("city", target: contactInfoModel, mutual: true))
+                    }
+                    panel(id: "webInfo", visible: false, constraints: "hidemode 3", layout: new MigLayout("fill", "[][]", "[]10[]")) {
+                        label(text: "E-mail", constraints: "width 100!")
+                        textField(id: "email", constraints: "width 130!, wrap, align right", text: bind("email", target: contactInfoModel, mutual: true))
+                        label(text: "Home page")
+                        textField(id: "homePage", constraints: "width 130!", text: bind("homePage", target: contactInfoModel, mutual: true))
+                    }
+                    panel(id: "summary", visible: false, constraints: "hidemode 3", layout: new MigLayout("fill", "[][]", "[]10[]")) {
+
+                        label(text: "First name", constraints: "width 100!")
+                        textField(id: "firstName", constraints: "width 130!, wrap, align right", text: bind { contactInfoModel.firstName })
+
+                        label(text: "Surname")
+                        textField(id: "surName", constraints: "width 130!, wrap", text: bind { contactInfoModel.surName })
+
+                        label(text: "Address", constraints: "width 100!")
+                        textField(id: "address", constraints: "width 130!, wrap, align right", text: bind { contactInfoModel.address })
+
+                        label(text: "City")
+                        textField(id: "city", constraints: "width 130!, wrap", text: bind { contactInfoModel.city })
+
+                        label(text: "E-mail", constraints: "width 100!")
+                        textField(id: "email", constraints: "width 130!, wrap, align right", text: bind { contactInfoModel.email })
+
+                        label(text: "Home page")
+                        textField(id: "homePage", constraints: "width 130!", text: bind { contactInfoModel.homePage })
+                    }
                 }
-                navButton("prevButton", "Prev", "width 70!", previousAction, "previous", bind { step.current > 0 })
-                navButton("nextButton", "Next", "align right, width 70!", nextAction, "next", bind { step.current < 3 })
+                button(
+                        id: "prevButton",
+                        text: "Prev",
+                        constraints: "width 70!",
+                        enabled: bind { step.currentPanel > 0 },
+                        action: swing.action(name: "Previous", closure: this.&previousButtonClosure),
+                        actionCommand: "previous"
+                )
+                button(
+                        id: "nextButton",
+                        text: "Next",
+                        constraints: "align right, width 70!",
+                        enabled: bind { step.currentPanel < 3 },
+                        action: swing.action(name: "Next", closure: this.&nextButtonClosure),
+                        actionCommand: "next"
+                )
             }
         }
     }
@@ -53,58 +98,22 @@ class ContactInfoView {
     /** Controller related **/
 
     void previousButtonClosure(event) {
-        hidePanels()
-        swing.infoPanels.components[--step.current].visible = true
+        if(step.currentPanel == 0) return
+        swing.infoPanels.components[step.currentPanel].visible = false
+        swing.infoPanels.components[--step.currentPanel].visible = true
+        frame.pack()
     }
 
     void nextButtonClosure(event) {
-        hidePanels()
-        swing.infoPanels.components[++step.current].visible = true
+        if(step.currentPanel == swing.infoPanels.components.length - 1) return
+        swing.infoPanels.components[step.currentPanel].visible = false
+        swing.infoPanels.components[++step.currentPanel].visible = true
+        frame.pack()
     }
 
-    void hidePanels() {
-        swing.infoPanels.components.each{component ->
-            component.visible = false
-        }
+    @Bindable
+    private class Step {
+        int currentPanel = 0
     }
 
-    /** Factory methods **/
-
-    def infoPanel(String panelId, boolean visible, String labelOneText, String textFieldOneId, String labelTwoText, String textFieldTwoId) {
-        swing.panel(
-                id: panelId,
-                visible: visible,
-                constraints: "hidemode 3",
-                layout: new MigLayout(
-                        "fill",
-                        "[][]", //Column constraints
-                        "[]10[]"  //Row constraints
-                )
-        ) {
-//            label(text: labelOneText, constraints: "width 100!")
-//            textField(id: textFieldOneId, constraints: "width 130!, wrap, align right")
-            inputWidget(labelOneText, "width 100!", textFieldOneId, "width 130!, wrap, align right")
-
-//            label(text: labelTwoText)
-//            textField(id: textFieldTwoId, constraints: "width 130!")
-            inputWidget(labelTwoText, "width 100!", textFieldTwoId, "width 130!, wrap, align right")
-        }
-    }
-
-    def inputWidget(String labelText, String labelConstraints, String textFieldId, String textFieldConstraints) {
-        swing.label(text: labelText, constraints: labelConstraints)
-        swing.textField(id: textFieldId, constraints: textFieldConstraints)
-    }
-
-    def navButton(String id, String text, String constraints, Action action, String actionCommand,
-                  ClosureTriggerBinding closureTriggerBinding) {
-        swing.button(
-                id: id,
-                text: text,
-                constraints: constraints,
-                enabled: closureTriggerBinding,
-                action: action,
-                actionCommand: actionCommand
-        )
-    }
 }
