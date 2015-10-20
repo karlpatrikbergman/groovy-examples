@@ -1,10 +1,8 @@
-package inaction.builders.swing
+package inaction.builders.swing.simple
 
 import groovy.swing.SwingBuilder
 
-swing = new SwingBuilder(
-
-)
+swing = new SwingBuilder()
 frame = swing.frame(title: 'Demo') {
     panel {
         textField(id: 'message', columns: 10)

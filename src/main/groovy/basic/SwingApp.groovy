@@ -1,9 +1,6 @@
-import groovy.swing.SwingBuilder
-import groovy.beans.Bindable
+package basic
 
-class MyModel {
-    @Bindable int count = 0
-}
+import groovy.swing.SwingBuilder
 
 def model = new MyModel()
 new SwingBuilder().edt {

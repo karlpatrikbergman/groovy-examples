@@ -15,7 +15,7 @@ System.out.println(half(10))
 x = 1
 int y = 2
 
-public bar() {
+bar() {
     assert x == 1
     try {
         assert y == 2
