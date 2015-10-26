@@ -1,0 +1,42 @@
+An attempt to understand how Groovy handles method invocations
+for methods that are not defined.
+
+It started with swingbuilder.action. There is no method in SwingBuilder called
+action?
+
+Example code:
+swing = new SwingBuilder()
+frame = swing.build() {
+    frame(
+            title: 'Demo',
+            pack: true,
+            visible: true) {
+        panel {
+            textField(id: 'message', columns: 10)
+            button(text: 'Print', actionPerformed: { event ->
+                println swing.message.text
+            })
+        }
+    }
+}
+
+Pseudo code call chain:
+SwingBuilder.frame -->
+    FactoryBuilder.invokeMethod(String methodName, Object args) -->
+        FactoryBuilderSupport.doInvokeMethod(String methodName, Object name, Object args) -->
+            .checkExplicitMethod(String methodName, Object args, Reference result) -->
+                .resolveExplicitMethod(methodName, args) -->
+                    .getExplicitMethods() -->
+                        Collections.unmodifiableMap(getProxyBuilder().explicitMethods) -->
+                            .getProxyBuilder() -->
+                                localProxyBuilder.get() -->
+                                    .explicitMethods() -->
+                                    Map<String, Closure>.get(Object key) -->
+                                        Closure.call()
+
+
+
+
+                        .get(methodName)
+
+

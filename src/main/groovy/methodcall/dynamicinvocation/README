@@ -1,0 +1,56 @@
+
+Multiple Dispatch
+-----------------
+Multiple dispatch or multimethods is a feature of
+some programming languages in which a function or
+method can be dynamically dispatched based on the
+run-time (dynamic) type or, in the more general
+case some other attribute, of more than one of its
+arguments.
+(Wikipedia)
+
+When a dynamic dispatching mechanism for a function
+uses more than one piece of information to determine
+which function to actually call. Usually the pieces
+of information are the types of the parameters
+passed to the function.
+(http://c2.com/cgi/wiki?MultipleDispatch)
+
+Dynamic Dispatch
+----------------
+In computer science, dynamic dispatch is the process
+of selecting which implementation of a polymorphic
+operation (method or function) to call at run time.
+Dynamic dispatch contrasts with static dispatch in
+which the implementation of a polymorphic operation
+is selected at compile-time. The purpose of dynamic
+dispatch is to support cases where the appropriate
+implementation of a polymorphic operation can't
+be determined at compile time because it depends
+on the runtime type of one or more actual parameters
+to the operation.
+
+
+Single and multiple dispatch
+----------------------------
+If the decision of which version of a method to call
+is based entirely on the class of the object x, then
+this is known as single dispatch because an implementation
+is chosen based on a single type – the type of the
+instance.
+
+Single dispatch is supported by many object-oriented
+languages, including statically typed languages such
+as C++ and Java, and dynamically typed languages
+such as Smalltalk, Objective-C, JavaScript, and Python.
+
+In some languages, such as Common Lisp or Dylan,
+methods or functions can also be dispatched based on
+the types of their arguments.
+
+Expressed in pseudocode, the code:
+    manager.handle(y)
+
+could call different implementations depending on the
+types of both objects manager and y. This is known
+as multiple dispatch.
